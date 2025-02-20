@@ -48,6 +48,13 @@ async function run() {
       res.send(result);
     })
 
+    // create job post
+    app.post('/jobs', async(req, res)=>{
+      const newJob = req.body;
+      const result = await jobsCollection.insertOne(newJob);
+      res.send(result)
+    })
+
     // get all jobs data by email
     app.get('/job-application', async(req, res)=>{
       const email = req.query.email;
