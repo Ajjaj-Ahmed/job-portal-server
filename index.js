@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
 
-    
+
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
@@ -34,38 +34,44 @@ async function run() {
 
     const jobsCollection = client.db("jobPortal").collection("jobs")
     const jobApplicationCollection = client.db('jobPortal').collection('job_applications');
-    
-    app.get('/jobs', async(req,res)=>{
+
+    app.get('/jobs', async (req, res) => {
+
+      const email = req.query.email;
+      let query = {};
+      if (email) {
+        query = { hr_email: email }
+      }
       const cursor = jobsCollection.find();
       const result = await cursor.toArray();
       res.send(result)
     })
 
-    app.get('/jobs/:id', async(req, res)=>{
+    app.get('/jobs/:id', async (req, res) => {
       const id = req.params.id;
-      const query = {_id:new ObjectId(id)}
-      const result= await jobsCollection.findOne(query);
+      const query = { _id: new ObjectId(id) }
+      const result = await jobsCollection.findOne(query);
       res.send(result);
     })
 
     // create job post
-    app.post('/jobs', async(req, res)=>{
+    app.post('/jobs', async (req, res) => {
       const newJob = req.body;
       const result = await jobsCollection.insertOne(newJob);
       res.send(result)
     })
 
     // get all jobs data by email
-    app.get('/job-application', async(req, res)=>{
+    app.get('/job-application', async (req, res) => {
       const email = req.query.email;
-      const query = {applicant_email : email}
+      const query = { applicant_email: email }
       const result = await jobApplicationCollection.find(query).toArray();
 
       // getting job information by id
-      for(const applicaiton of result){
-        const query1 = {_id : new ObjectId(applicaiton.job_id)}
+      for (const applicaiton of result) {
+        const query1 = { _id: new ObjectId(applicaiton.job_id) }
         const job = await jobsCollection.findOne(query1);
-        if(job){
+        if (job) {
           applicaiton.title = job.title;
           applicaiton.location = job.location;
           applicaiton.company = job.company;
@@ -77,7 +83,7 @@ async function run() {
     })
 
     // job application api
-    app.post('/job-applications', async(req,res)=>{
+    app.post('/job-applications', async (req, res) => {
       const applicaiton = req.body;
       const result = await jobApplicationCollection.insertOne(applicaiton);
       res.send(result)
