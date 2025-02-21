@@ -83,10 +83,40 @@ async function run() {
       res.send(result)
     })
 
+    // get job application by id
+    app.get('/job-applications/jobs/:job_id', async (req, res) => {
+      const jobId = req.params.job_id;
+      const query = { job_id: jobId }
+      const result = await jobApplicationCollection.find(query).toArray()
+      res.send(result);
+    })
+
     // job application api
     app.post('/job-applications', async (req, res) => {
       const applicaiton = req.body;
       const result = await jobApplicationCollection.insertOne(applicaiton);
+
+      // get my id , how many apply my post
+      const id = applicaiton.job_id;
+      const query = { _id: new ObjectId(id) };
+      const job = await jobsCollection.findOne(query);
+
+      let newCount = 0;
+      if (job.applicationCount) {
+        newCount = job.applicationCount + 1;
+      }
+      else {
+        newCount = 1;
+      }
+      // now update the job info
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          applicationCount: newCount
+        }
+      }
+
+      const updateResult = await jobsCollection.updateOne(filter, updatedDoc);
       res.send(result)
     })
 
