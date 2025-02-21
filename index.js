@@ -42,7 +42,8 @@ async function run() {
       if (email) {
         query = { hr_email: email }
       }
-      const cursor = jobsCollection.find();
+
+      const cursor = jobsCollection.find(query);
       const result = await cursor.toArray();
       res.send(result)
     })
